@@ -1,0 +1,110 @@
+#+STARTUP: showall
+#+OPTIONS: toc:t
+#+OPTIONS: num:nil
+#+OPTIONS: html-postamble:nil
+#+LANGUAGE: zh-CN
+#+OPTIONS:   ^:{}
+#+TITLE: CloudCli CHANGELOG
+
+* v0.7.2 版（2016-12-27）
+1. fix issue #8 需要提供二进制程序
+2. fix issue #12 found no node to copy file/directory
+3. fix issue #13 执行命令超时报错 
+4. fix issue #14 执行 awk 命令报错
+5. fix issue #15 执行 sed 命令报错
+6. fix issue #16 执行 grep 命令报错
+
+* v0.7.1 版（2016-12-12）
+1. 迁移项目到 idcos organization
+2. version 问题，编译时用 编译参数的方式，注入git revision number
+
+* v0.7.0 版（2016-12-06）
+1. 命令行的名称改为 cloudcli
+2. 追加 ping 功能，测试远程服务器是否连通
+3. 首次使用时，配置文件自动初始化
+
+* v0.6.5 版（2016-12-02）
+1. put 并行传输远程文件，文件夹 （显示正在传输的node）
+2. get 并行传输远程文件，文件夹 （显示正在传输的node）
+3. get put 时文件传输的 buffer 大小设置
+4. 重构了 sshrunner 的代码，将文件传输部分的代码分离成单独的文件
+ 
+* v0.6.4 版（2016-11-18）
+1. get 文件夹时，--src == /path/to/testdir 只将远程文件夹testdir 中的所有文件/文件夹拷贝到本地; --src == ./testdir/ 将连同远程文件夹 testdir 本身一起拷贝到本地
+2. 所有子命令的错误移到 main 中统一处理
+
+* v0.6.3 版（2016-11-03）
+1. put 传输文件时，显示正在传输哪个文件以及文件传输进度
+2. get 传输文件时，显示正在传输哪个文件以及文件传输进度
+
+* v0.6.2 版（2016-10-07）
+1. put subcommand 在远程文件夹不存在时，自动创建远程文件夹
+2. fix bug put 传输文件时，文件内容有丢失
+ 
+* v0.6.1 版（2016-09-23）
+1. fix issue #6 --src/--dst 不能自动补全本地路径
+2. fix 输入不存在的参数时，Tab自动补全时全是错误的备选项
+
+* v0.6.0 版（2016-08-04）
+1. 增加子命令 put： 传输 本地文件/文件夹 到多台机器（同步方式）
+2. 增加子命令 get： 传输 远程机器的文件/文件夹 到本地（目前只能从一台主机上get）
+3. 机器配置文件的精简（可以设置组通用的密码或者sshkey）
+4. 重构ssh lib，将ssh相关操作放在 单独的 sshlib.go 中（有交互式命令和非交互式命令）
+
+* v0.5.1 版（2016-05-30）
+1. 集成 travis-ci 测试
+
+* v0.5.0 版（2016-05-29）
+1. list 自动补全 -g 和 -n 参数
+2. 可以配置常用命令，.cloudcli 中添加 [CmdAlias] section
+3. 增加 login 子命令，通过 login 可以登录到某台机器的 bash 上去
+
+* v0.4.0 版（2016-05-22）
+1. fix issue#3 多台主机上并行执行命令
+2. 返回结果的统计
+3. sshRunner 加入超时机制
+
+* v0.3.1 版（2016-05-17）
+1. 配置文件中支持路径使用 ~
+2. 解决 exec -n 参数补全无效的问题
+3. 解决 zsh source autocomplete 脚本时出现的错误（for MacOSX）
+
+* v0.3.0 版 (2016-05-07)
+1. exec 子命令 支持多个 -n 参数
+   示例： 
+   #+BEGIN_SRC sh
+   cloudcli exec -g 'group*' -n 'node1' -n 'node2' -c 'uptime'
+   #+END_SRC
+2. exec 子命令 加入 -y/--yes 参数，此参数表示可以不用确认，直接执行
+   示例： 
+   #+BEGIN_SRC sh
+   cloudcli exec -g 'group*' -n 'node1' -n 'node2' -c 'uptime' -y
+   #+END_SRC
+3. exec 子命令批量执行时，执行失败的节点和成功的节点之间加入分隔
+4. list 子命令 加入 -a/--all 参数，显示 node的所有信息
+   示例：
+   #+BEGIN_SRC sh
+   cloudcli list -a
+   #+END_SRC
+5. exec 子命令可以自动补全 -g 和 -n option 后面的内容
+
+* v0.2.0 版 (2016-04-27)
+1. 重新规划了 list 子命令显示的内容
+   - list 显示所有group及其包含的所有nodes详细
+   - list -g "xx" 显示名称为xx的group及其包含的所有nodes详细信息
+   - list -g "xx" -n "yy" 显示名称为xx的group及其包含的名称为yy的node详细信息
+2. list和exec 子命令支持 -g 和 -n option中使用通配符(?和*）
+   - ? 匹配1个任意字符
+   - * 匹配0个或多个任意字符
+3. 命令执行时，以及返回结果中对某些信息加了颜色标识
+4. 返回结果中没有 stderr 信息，则不显示 stderr 标识
+5. 命令执行前提示执行的主机，命令，并确认是否执行
+6. 对 exec 子命令，如果输入的-g or -n 没有匹配到任何主机时，给出提示信息
+7. fix serval bugs
+
+* v0.1.0 版 (2016-04-24)
+1. 远程执行命令 （by SSH）
+2. 主机分组
+3. 主机/主机组 YAML 文件管理
+
+	

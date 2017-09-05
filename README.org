@@ -1,0 +1,131 @@
+#+STARTUP: showall
+#+OPTIONS: toc:t
+#+OPTIONS: num:t
+#+OPTIONS: html-postamble:nil
+#+LANGUAGE: zh-CN
+#+OPTIONS:   ^:{}
+#+TITLE: CloudCli
+
+[[https://github.com/idcos/cloud-cli][https://img.shields.io/badge/language-Go-orange.svg]]
+[[https://github.com/idcos/cloud-cli][https://img.shields.io/badge/copyright-idcos-red.svg]]
+[[https://github.com/idcos/cloud-cli][https://img.shields.io/badge/license-MIT-blue.svg]]
+
+* 概述
+利用SSH协议，远程执行命令的命令行工具。
+
+远程服务器不用安装任何程序，只要开通SSH服务即可。
+
+简单，轻量，配置灵活。
+
+* Feature
+
+** 远程执行命令
+同时发送命令到多台机器执行，获取执行结果并显示。
+
+支持并发在多台机器上执行命令。
+
+** 登录远程机器
+登录远程机器，相当于一个简单的 ssh 客户端。
+
+直接使用命令 ~cloudcli login~ 时，会在 vim 中列出所有可登录的机器信息，
+
+利用vim的检索功能搜索到某个功能时，直接 Enter 登录。
+
+其中参考了 https://github.com/jpalardy/warp 项目的实现方式。
+
+** 远程传输文件
+put 文件/文件夹 到远程机器。
+从某台远程机器上 get 文件/文件夹。
+
+传输过程中显示传输进度
+ 
+** 命令简写
+通过配置文件中 [CmdAlias] section 的配置，定义一些常用的命令，在 exec 子命令的 -c 参数来使用。
+
+示例：以下命令表示执行 [CmdAlias] section 中的第一条命令 （[CmdAlias] section 的配置方法参见 [[file:INSTALL.zh_CN.org::%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E][配置文件说明]]）
+#+BEGIN_SRC sh
+cloudcli exec -g dgroup01 -n dgnode01 -c 1
+或者
+cloudcli exec -g dgroup01 -n dgnode01 -c '#1'
+#+END_SRC
+
+** 主机分组
+可以给主机分组，按照组名执行命令。
+
+一个组可以包含一个或多个主机，一个主机也可以属于一个多个组。
+
+** YAML 描述主机组和主机关系
+   配置密码和ssh-key的路径配置一个即可。
+#+BEGIN_SRC yaml
+NodeGroups:
+    - GroupName: group001
+      Port: 22
+      User: testuser
+      Password: testtest
+      KeyPath: /home/user/.ssh/private-key
+      Nodes:
+          - Name: golang
+            Host: 192.168.1.1
+          - Name: python
+            Host: 192.168.1.2
+
+    - GroupName: group002
+      Port: 22
+      Nodes:
+          - Name: elixir-lang
+            Host: 10.0.0.1
+            User: testuser
+            Password: testtest
+          - Name: elm-lang
+            Host: elm-lang.cn
+            User: root
+            KeyPath: /home/user/.ssh/private-key
+#+END_SRC
+
+可以在主机组上设置默认的 *User* *Password* *KeyPath* *Port* ，这样，主机（Node）如果没有设置 *User* *Password* *KeyPath* *Port* ，就使用所属主机组的默认设置。
+
+** 命令自动补全
+   ZSH 和 BASH 环境下启用自动补全方式是不一样的，启用方式如下：
+
+1. ZSH 环境下
+   - 找到 zsh 的 $fpath
+     #+BEGIN_SRC sh
+     echo $fpath
+     #+END_SRC
+   - 在 上述的路径之一中，创建连接 自动补全脚本的软链接（或者直接将自动补全脚本放入上面的任一路径之中）
+     #+BEGIN_SRC sh
+     ln -s /path/to/cloudcli/autocomplete/_cloudcli /path/of/fpath/_cloudcli
+     #+END_SRC
+ 
+2. BASH 环境下
+   把下面的代码加入到 .bashrc
+   #+BEGIN_SRC sh
+   source /path/to/cloudcli/autocomplete/bash_completion
+   #+END_SRC
+
+补充：
+1. 这2个 completion 脚本在 MacOSX 下已测试可以使用。
+   如果在 linux 下使用的话，请修改 bash_completion 中 */usr/local/etc/bash_completion* 的实际位置。
+ 
+2. 使用前安装 bash-completion package，Mac 下安装方式如下：
+   #+BEGIN_SRC sh
+   brew install bash-completion
+   #+END_SRC
+
+** 主机连通性检查（ping）
+   检查主机是否能够 ping 通时，可以使用下面的子命令：
+   #+BEGIN_SRC sh
+   cloudcli ping
+   cloudcli ping -g <groupName>
+   cloudcli ping -n <nodeName>
+   cloudcli ping -g <groupName> -n <nodeName>
+   #+END_SRC
+   
+   *注意* 在linux系统上，如果使用非 root 用户执行上面的 ping 子命令，可能会有权限不足的错误，通过以下方法修复：
+   #+BEGIN_SRC sh
+   sudo sysctl -w net.ipv4.ping_group_range="0 65535"
+   #+END_SRC
+
+* License
+MIT License 2016 (Iota Labs)
+
